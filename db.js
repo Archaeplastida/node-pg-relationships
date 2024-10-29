@@ -1,5 +1,13 @@
 /** Database setup for BizTime. */
 const { Client } = require("pg");
-let DB_URI = process.env.NODE_ENV === "testing" ? "postgresql:///biztime_testing" : "postgresql:///biztime", db = new Client({ connectionString: DB_URI });
+console.log(process.env.NODE_ENV);
+let the_DB = process.env.NODE_ENV === "testing" ? "biztime_testing" : "biztime";
+db = new Client({ user: 'postgres',
+       host: 'localhost',
+       database: the_DB,
+       password: '9542005',
+       port: 5432 });
 db.connect();
 module.exports = db;
+
+//lesson learned: the default name of the user is postgres, make sure to always try that first.
