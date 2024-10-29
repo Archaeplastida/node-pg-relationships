@@ -8,9 +8,10 @@ app.use(express.json());
 
 //** Routes */
 
-const {companyRoutes} = require("./routes/companies");
+const { companyRoutes } = require("./routes/companies"), { invoiceRoutes } = require("./routes/invoices");
 
 app.use("/companies", companyRoutes);
+app.use("/invoices", invoiceRoutes);
 
 /** 404 handler */
 
@@ -23,10 +24,8 @@ app.use(function (req, res, next) {
 
 app.use((err, req, res, next) => {
   res.status(err.status || 500);
-
   return res.json({
     error: err,
-    message: err.message
   });
 });
 
