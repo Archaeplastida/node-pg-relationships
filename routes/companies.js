@@ -20,7 +20,6 @@ router.get("/:code", async (req, res, next) => {
     try {
         const results = await db.query(`SELECT code, name, description FROM companies WHERE code = $1`, [req.params.code]);
         const results2 = await db.query(`SELECT id, comp_code, amt, paid, add_date, paid_date FROM invoices WHERE comp_code=$1`, [req.params.code]);
-        console.log(results)
         if (!!results.rows.length) return res.json({ company: { code: results.rows[0].code, name: results.rows[0].name, description: results.rows[0].description, invoices: results2.rows } });
         else throw new ExpressError(`Company code ${req.params.code} doesn't exist.`, 404);
     } catch (err) {
