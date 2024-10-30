@@ -1,6 +1,5 @@
 /** Database setup for BizTime. */
 const { Client } = require("pg");
-console.log(process.env.NODE_ENV);
 let the_DB = process.env.NODE_ENV === "testing" ? "biztime_testing" : "biztime";
 db = new Client({ user: 'postgres',
        host: 'localhost',
