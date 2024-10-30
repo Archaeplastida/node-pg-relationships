@@ -32,7 +32,7 @@ router.post("/", async (req, res, next) => {
         const data = req.body;
         if (data.code && data.name && data.description) {
             await db.query(`INSERT INTO companies (code, name, description) VALUES ($1, $2, $3)`, [data.code, data.name, data.description]);
-            return res.json({ company: { code: data.code, name: data.name, description: data.description } });
+            return res.status(201).json({ company: { code: data.code, name: data.name, description: data.description } });
         } else throw new ExpressError("Missing parameter(s)", 400);
     } catch (err) {
         return next(err);
@@ -46,7 +46,7 @@ router.put("/:code", async (req, res, next) => {
         if (!check.rows.length) throw new ExpressError(`Company code ${req.params.code} doesn't exist.`, 404);
         if (data.name && data.description) {
             await db.query(`UPDATE companies SET name=$1, description=$2 WHERE code=$3`, [data.name, data.description, req.params.code]);
-            return res.json({ company: { code: data.code, name: data.name, description: data.description } });
+            return res.status(201).json({ company: { code: data.code, name: data.name, description: data.description } });
         } else throw new ExpressError("Missing parameter(s)", 404);
     } catch (err) {
         return next(err);
@@ -58,7 +58,7 @@ router.delete("/:code", async (req, res, next) => {
         const results = await db.query(`SELECT code, name, description FROM companies WHERE code = $1`, [req.params.code]);
         if (!!results.rows.length) {
             await db.query(`DELETE FROM companies WHERE code=$1`, [req.params.code]);
-            return res.json({ status: "deleted" });
+            return res.status(200).json({ status: "deleted" });
         } else throw new ExpressError(`Company code ${req.params.code} doesn't exist.`, 404);
     } catch (err) {
         return next(err);
