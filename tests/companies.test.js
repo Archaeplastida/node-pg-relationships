@@ -81,7 +81,7 @@ describe("PUT /companies:code", () => {
             name: "Please Work",
             description: "This company never existed in the first place."
         })
-        expect(response.statusCode).toEqual(404)
+        expect(response.statusCode).toEqual(404);
         expect(response.body).toEqual({ error: { message: "Company code somethingwhichdoesnotexist doesn't exist.", status: 404 } })
     })
 })
@@ -92,6 +92,7 @@ describe("DELETE /companies:code", () => {
         expect(response.statusCode).toEqual(200);
         expect(response.body).toEqual({ status: 'deleted' })
     })
+
     test("Returns 404 if company isn't found.", async () => {
         const response = await request(app).delete(`/companies/either_something_which_does_not_exist_or_was_already_deleted`);
         expect(response.statusCode).toEqual(404);
