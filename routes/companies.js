@@ -1,9 +1,4 @@
-const db = require("../db");
-const ExpressError = require("../expressError");
-const invoices = require("./invoices");
-
-const express = require("express"), router = new express.Router();
-
+const db = require("../db"), ExpressError = require("../expressError"), express = require("express"), router = new express.Router(), slugify = require("slugify");
 
 //**GETS a list of all the companies in the db. */
 
@@ -18,9 +13,10 @@ router.get("/", async (req, res, next) => {
 
 router.get("/:code", async (req, res, next) => {
     try {
-        const results = await db.query(`SELECT code, name, description FROM companies WHERE code = $1`, [req.params.code]);
-        const results2 = await db.query(`SELECT id, comp_code, amt, paid, add_date, paid_date FROM invoices WHERE comp_code=$1`, [req.params.code]);
-        if (!!results.rows.length) return res.json({ company: { code: results.rows[0].code, name: results.rows[0].name, description: results.rows[0].description, invoices: results2.rows } });
+        const results = await db.query(`SELECT code, name, description FROM companies WHERE code = $1`, [req.params.code]),
+            results2 = await db.query(`SELECT id, comp_code, amt, paid, add_date, paid_date FROM invoices WHERE comp_code=$1`, [req.params.code]),
+            results3 = await db.query(`SELECT industries.code, industries.industry FROM industries JOIN industries_companies ON industries.code = industries_companies.industry_code JOIN companies ON industries_companies.company_code = companies.code WHERE companies.code=$1`, [req.params.code]);
+        if (!!results.rows.length) return res.json({ company: { code: results.rows[0].code, name: results.rows[0].name, description: results.rows[0].description, invoices: results2.rows, industries: results3.rows } });
         else throw new ExpressError(`Company code ${req.params.code} doesn't exist.`, 404);
     } catch (err) {
         return next(err);
@@ -30,9 +26,9 @@ router.get("/:code", async (req, res, next) => {
 router.post("/", async (req, res, next) => {
     try {
         const data = req.body;
-        if (data.code && data.name && data.description) {
-            await db.query(`INSERT INTO companies (code, name, description) VALUES ($1, $2, $3)`, [data.code, data.name, data.description]);
-            return res.status(201).json({ company: { code: data.code, name: data.name, description: data.description } });
+        if (data.name && data.description) {
+            await db.query(`INSERT INTO companies (code, name, description) VALUES ($1, $2, $3)`, [slugify(data.name, { lower: true }), data.name, data.description]);
+            return res.status(201).json({ company: { code: slugify(data.name, { lower: true }), name: data.name, description: data.description } });
         } else throw new ExpressError("Missing parameter(s)", 400);
     } catch (err) {
         return next(err);
