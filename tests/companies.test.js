@@ -34,6 +34,7 @@ describe("GET /companies/:code", () => {
         for (let i = 0; i < testInvoices.length; i++) response.body.company.invoices[i].add_date = testInvoices[i].add_date;
         expect(response.statusCode).toEqual(200);
         testCompany.invoices = testInvoices;
+        testCompany.industries = []; //since we have no industries, we should have an empty array.
         expect(response.body).toEqual({ company: testCompany })
     })
 
@@ -47,12 +48,11 @@ describe("GET /companies/:code", () => {
 describe("POST /companies", () => {
     test("Adds a new company.", async () => {
         const response = await request(app).post(`/companies`).send({
-            code: "test2",
             name: "Test Company 2",
             description: "A company which is also used for testing."
         })
         expect(response.statusCode).toEqual(201);
-        expect(response.body).toEqual({ company: { code: 'test2', name: 'Test Company 2', description: 'A company which is also used for testing.' } });
+        expect(response.body).toEqual({ company: { code: 'test-company-2', name: 'Test Company 2', description: 'A company which is also used for testing.' } });
     })
 
     test("Returns 400 if one of the parameters are missing.", async () => {
