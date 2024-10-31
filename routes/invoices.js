@@ -1,7 +1,4 @@
-const db = require("../db");
-const ExpressError = require("../expressError");
-
-const express = require("express"), router = new express.Router();
+const db = require("../db"), ExpressError = require("../expressError"), express = require("express"), router = new express.Router();
 
 router.get("/", async (req, res, next) => {
     try {
@@ -36,11 +33,14 @@ router.post("/", async (req, res, next) => {
 
 router.put("/:id", async (req, res, next) => {
     try {
-        const data = req.body;
-        const check = await db.query(`SELECT id FROM invoices WHERE id=$1`, [req.params.id])
+        const data = req.body, check = await db.query(`SELECT id, paid FROM invoices WHERE id=$1`, [req.params.id]);
+        let result;
         if (!check.rows.length) throw new ExpressError(`Invoice ${req.params.id} doesn't exist.`, 404);
         if (data.amt) {
-            const result = await db.query(`UPDATE invoices SET amt=$1 WHERE id=$2 RETURNING id, comp_code, amt, paid, add_date, paid_date`, [data.amt, req.params.id]);
+            data.paid = !data.paid ? false : true;
+            let paid_date = data.paid ? `CURRENT_DATE` : null;
+            if (check.rows[0].paid && data.paid) result = await db.query(`UPDATE invoices SET amt=$1 WHERE id=$2 RETURNING id, comp_code, amt, paid, add_date, paid_date`, [data.amt, req.params.id]);
+            else result = await db.query(`UPDATE invoices SET amt=$1, paid=$2, paid_date=${paid_date} WHERE id=$3 RETURNING id, comp_code, amt, paid, add_date, paid_date`, [data.amt, data.paid, req.params.id]);
             return res.status(201).json({ invoice: result.rows[0] });
         } else throw new ExpressError("Missing parameter.", 400);
     } catch (err) {
